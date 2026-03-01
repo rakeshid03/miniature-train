@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brand • Login</title> <!-- Google font close to UI -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"> <!-- Firebase v9 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      sendEmailVerification,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    
+    
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyArp702oudfyWaixwurzUlXi1ojW4gQy1k",
+      authDomain: "contact-e46cf.firebaseapp.com",
+      databaseURL: "https://contact-e46cf-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "contact-e46cf",
+      storageBucket: "contact-e46cf.firebasestorage.app",
+      messagingSenderId: "846074615994",
+      appId: "1:846074615994:web:caf518253b8220de7d4a83",
+      measurementId: "G-7ML33M2C3C"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    const db = getDatabase(app);
+    
+    
+    window.googleLogin = () => {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          console.log("Logged in:", result.user);
+          alert("Login success");
+        })
+        .catch((error) => {
+          console.error(error);
+          alert(error.message);
+        });
+    };
+    
+    
+    window.signup = async () => {
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+      
+      if (!email || !pass) {
+        alert("Please enter email and password");
+        return;
+      }
+      
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+        
+        await sendEmailVerification(userCredential.user);
+        
+        alert("Verification email sent. Please verify your email before logging in.");
+        
+        await signOut(auth); // force logout until verified
+      } catch (err) {
+        alert(err.message);
+      }
+    };
+    
+    window.login = async () => {
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+      
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+        
+        if (!userCredential.user.emailVerified) {
+          alert("Please verify your email before logging in.");
+          await signOut(auth);
+          return;
+        }
+        
+        
+        // Redirect after login
+        window.location.href = "index.html";
+      } catch (err) {
+        alert(err.message);
+      }
+    };
+    
+    onAuthStateChanged(auth, (user) => {
+  if (user) {
+    window.location.replace("index.html");
+  }
+});
+    
+    window.toggleMode = () => {
+      document.body.classList.toggle('signup');
+    };
+    
+    
+    
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Inter, sans-serif;
+    }
+    
+    body {
+      margin: 0;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    
+    .phone {
+      width: 360px;
+      background: #fff;
+      border-radius: 28px;
+      padding: 28px 22px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, .12);
+    }
+    
+    .logo {
+      text-align: center;
+      margin-bottom: 70px;
+    }
+    
+    .logo img {
+      height: 44px;
+    }
+    
+    h1 {
+      text-align: center;
+      font-size: 26px;
+      margin: 10px 0 6px;
+    }
+    
+    p.sub {
+      text-align: center;
+      color: #777;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    
+    input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid #ddd;
+      margin-bottom: 14px;
+      font-size: 15px;
+    }
+    
+    
+    button.primary {
+      width: 100%;
+      padding: 14px;
+      border-radius: 16px;
+      border: none;
+      background: linear-gradient(180deg, #FFD34E, #F7B500);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    
+    button.google {
+      width: 100%;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid #ddd;
+      background: #fff;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    
+    .switch {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 14px;
+    }
+    
+    .switch span {
+      color: #f7b500;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    
+    body.signup .login-only {
+      display: none;
+    }
+    
+    body:not(.signup) .signup-only {
+      display: none;
+    }
+    
+    .secure {
+      margin-top: 22px;
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+    }
+  </style>
+</head>
+
+<body class="signup">
+  <div class="phone">
+    <div class="logo">
+      <!-- 🔁 replace logo -->
+      <img src="https://dummyimage.com/200x60/ffd34e/000&text=Brand" />
+    </div>
+    <h1 class="signup-only">Sign up</h1>
+    <h1 class="login-only">Sign in</h1>
+    
+    <p class="sub signup-only">Get started by creating an account.</p>
+    <p class="sub login-only">Welcome back! Please log in.</p>
+    
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    
+    <button class="primary signup-only" onclick="signup()">Next</button>
+    <button class="primary login-only" onclick="login()">Next</button>
+    
+    <button class="google" onclick="googleLogin()">Continue with Google</button>
+    
+    <div class="switch signup-only">
+      Already have an account? <span onclick="toggleMode()">Sign in</span>
+    </div>
+    
+    <div class="switch login-only">
+      New user? <span onclick="toggleMode()">Sign up</span>
+    </div>
+    
+    <div class="secure">🔒 Secure & private</div>
+    
+  </div>
+</body>
+
+</html>
