@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>QR App</title>
+  
+  <!-- Google Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <!--QR code generator-->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+  <!-- html2canvas for div-to-image -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- QR Scanner Library -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  
+  
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --card: rgba(255, 255, 255, 1);
+      --text: #1c1c1e;
+      --muted: #6b7280;
+      --primary: #f5b301;
+      --border: #e5e7eb;
+      --forbg: rgba(245, 179, 1, 0.15);
+      --shadow: 0 6px 16px rgba(0, 0, 0, .05);
+      
+    }
+    
+    [data-theme="dark"] {
+      --bg: #0f1115;
+      --card: #1a1c22;
+      --text: #ffffff;
+      --muted: #9ca3af;
+      --primary: #f5b301;
+      --border: #2a2d36;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+      transition: background .25s, color .25s, transform .15s;
+    }
+    
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      width: 100%;
+      height: 100%;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body::-webkit-scrollbar {
+      display: none;
+    }
+    
+    a {
+      color: #343b45;
+      text-decoration: none;
+    }
+    
+    .app {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0;
+      right: 0;
+    }
+    
+    /* HEADER */
+    .header {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      font-weight: 600;
+      font-size: 20px;
+      justify-content: space-between;
+    }
+    
+    .back-btn {
+      cursor: pointer;
+    }
+    
+    .notification {
+      position: relative;
+      background: var(--card);
+      border-radius: 50%;
+      padding: 9px;
+      display: flex;
+      font-size: 1.4rem;
+      border: 1px solid var(--border);
+    }
+    
+    .notification:hover,
+    .notification:active {
+      background: var(--card);
+      color: var(--primary);
+    }
+    
+    /* Badge */
+    .badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: #ff3b30;
+      color: white;
+      font-size: 10px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+    }
+    
+    .caption {
+      text-align: center;
+      font-size: 14px;
+      color: var(--primary);
+      padding: 10px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    
+    .tag {
+      font-size: 12px;
+      width: fit-content;
+      min-width: 18px;
+      height: 18px;
+      padding: 4px 10px;
+      border-radius: 10px;
+      margin-top: 4px;
+      text-align: center;
+    }
+    
+    /* CONTENT */
+    .content {
+      flex: 1;
+      overflow: auto;
+      padding: 16px;
+    }
+    
+    .sub {
+      font-size: 13px;
+      color: var(--muted);
+      
+    }
+    
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+    }
+    
+    .row:not(:last-child) {
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    /* PROFILE CARD */
+    .profile-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #ddd;
+      overflow: hidden;
+    }
+    
+    .avatar img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      top: 0;
+      left: 0;
+    }
+    
+    .subtext {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    
+    /* SWITCH */
+    .switch {
+      width: 44px;
+      height: 24px;
+      background: #ddd;
+      border-radius: 20px;
+      position: relative;
+    }
+    
+    .switch::after {
+      content: "";
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: .2s;
+    }
+    
+    .switch.active {
+      background: var(--primary);
+    }
+    
+    .switch.active::after {
+      transform: translateX(20px);
+    }
+    
+    /* SEGMENT */
+    .segment {
+      background: #ededf1;
+      border-radius: 14px;
+      padding: 4px;
+      display: flex;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+    }
+    
+    .segment button {
+      flex: 1;
+      border: none;
+      background: none;
+      padding: 10px 0;
+      font-size: 15px;
+      border-radius: 12px;
+      color: #777;
+    }
+    
+    .segment button.active {
+      background: white;
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    
+    /* QR */
+    .qr {
+      display: inline-block;
+      background: white;
+      width: 200px;
+      height: 200px;
+      padding: .5rem;
+      margin: 0 auto 12px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    
+    #qrcode canvas {
+      width: 190px;
+      height: 190px;
+    }
+    
+    #qr-image {
+      display: none;
+    }
+    
+    /* SCAN */
+    .scan-box {
+      background: linear-gradient(#555, #777);
+      border-radius: 20px;
+      height: 320px;
+      width: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    
+    .scan-text {
+      text-align: center;
+      margin: 16px 0;
+    }
+    
+    .scan-actions {
+      margin-top: 18px;
+      display: flex;
+      gap: 12px;
+    }
+    
+    .action {
+      flex: 1;
+      background: var(--card);
+      padding: 14px;
+      border-radius: 14px;
+      text-align: center;
+      font-weight: 500;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .action:active {
+      transform: scale(.97);
+    }
+    
+    
+    /* BUTTONS */
+    .btn-primary,
+    .btn-secondary {
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      border: none;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      margin-top: 12px;
+    }
+    
+    .btn-secondary {
+      background: #f1f1f1;
+      margin-top: 10px;
+    }
+    
+    button:active {
+      transform: scale(.97);
+    }
+    
+    
+    /* BOTTOM NAV */
+    .nav {
+      z-index: 99;
+      width: 100%;
+      height: 65px;
+      background: var(--card);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      border-top-left-radius: 18px;
+      border-top-right-radius: 18px;
+    }
+    
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 12px;
+      padding: .4rem 2.5rem;
+      color: var(--muted);
+      gap: 2px;
+    }
+    
+    .nav-item.active {
+      color: var(--primary);
+    }
+    
+    .nav-item span {
+      font-size: 24px;
+    }
+    
+    .welcome {
+      margin-bottom: 14px;
+      margin-top: -8px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    /* CARD */
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(20px);
+      animation: slideIn 0.5s ease forwards;
+    }
+    
+    .card:not(:last-child) {
+      margin-bottom: 14px;
+    }
+    
+    .card.no-animate {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+    
+    .card:nth-child(1) {
+      animation-delay: 0.05s;
+    }
+    
+    .card:nth-child(2) {
+      animation-delay: 0.1s;
+    }
+    
+    .card:nth-child(3) {
+      animation-delay: 0.15s;
+    }
+    
+    .card:nth-child(4) {
+      animation-delay: 0.2s;
+    }
+    
+    .card:nth-child(5) {
+      animation-delay: 0.25s;
+    }
+    
+    @keyframes slideIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* EXPANDABLE CARD */
+    .card.collapsed .list-item:nth-child(n+4),
+    .card.collapsed p.sub:nth-child(n+2) {
+      display: none;
+    }
+    
+    /* Rotate chevron */
+    .card.open .card-header .material-icons-outlined:last-child {
+      transform: rotate(90deg);
+    }
+    
+    .card-header {
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .list-item:hover {
+      background: #f0f2f5;
+    }
+    
+    .primary {
+      color: var(--primary);
+    }
+    
+    .status-box {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: 2px solid #e6e6e6;
+      background-color: transparent;
+      font-size: 14px;
+      outline: none;
+      resize: none;
+      min-height: 70px;
+    }
+    
+    .status-box:focus {
+      border: 2px solid;
+      border-color: var(--primary);
+      
+    }
+    
+    .status-options {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    
+    .option {
+      background: var(--border);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+    }
+    
+    .option:hover {
+      background: rgba(245, 179, 1, 0.15);
+      color: var(--primary);
+    }
+    
+    
+    /* BUTTON */
+    .post-btn {
+      background: var(--primary);
+      border: none;
+      padding: 7px 18px;
+      border-radius: 10px;
+      font-weight: 500;
+      color: #fff;
+      cursor: pointer;
+    }
+    
+    .post-btn:active {
+      transform: scale(.97);
+    }
+    
+    /* LIST ITEMS */
+    .list-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-radius: 12px;
+      padding: 12px 8px;
+      transition: all .1s ease;
+    }
+    
+    .list-item:not(:last-child) {
+      border-bottom: .8px solid var(--border);
+    }
+    
+    .item-text,
+    .details {
+      flex: 1;
+    }
+    
+    
+    .name {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 15px;
+    }
+    
+    .time {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    
+    /* Avatar */
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #e7ebf3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    
+    /* TEXT BLOCK */
+    .details {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .activity-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+    }
+    
+    /* Text color only */
+    .activity-line .sub {
+      color: gray;
+    }
+    
+    .activity-line .material-icons-outlined {
+      font-size: 18px;
+    }
+    
+    .missed {
+      color: #c0392b;
+    }
+    
+    .scan {
+      color: #E6A800;
+    }
+    
+    .answered {
+      color: #1e8449;
+    }
+    
+    /* TAGS */
+    .tag {
+      font-size: 12px;
+      width: fit-content;
+      padding: 4px 10px;
+      border-radius: 10px;
+      margin-top: 4px;
+      text-align: center;
+    }
+    
+    /* RIPPLE */
+    .ripple {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* ripple circle */
+    .ripple .ripple-effect {
+      position: absolute;
+      border-radius: 50%;
+      transform: scale(0);
+      animation: ripple-animation 600ms linear;
+      background: rgba(0, 0, 0, 0.12);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    /* keep content above ripple */
+    .ripple>* {
+      position: relative;
+      z-index: 1;
+    }
+    
+    @keyframes ripple-animation {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+    
+    
+    .scan-instructions {
+      display: flex;
+      gap: 10px;
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.04);
+      font-size: 14px;
+      color: #666;
+      margin-top: 12px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <!-- HEADER -->
+    <div class="header">
+      <div class="left">
+        <span class="material-icons-outlined back-btn" onclick="goBack()">arrow_back</span>
+        <div class="header-title" id="headerTitle">Home</div>
+      </div>
+      
+      <span class="notification" onclick="showNotifications()">
+        <span class="material-icons-outlined">notifications</span>
+        <span class="badge" id="notifBadge">5</span>
+      </span>
+    </div>
+    
+    
+    <!-- APP All CONTENT -->
+    <div class="content" id="content">
+      
+    </div>
+    
+    <!-- NAV -->
+    <div class="nav">
+      <div class="nav-item active" onclick="showHome()">
+        <span class="material-icons-outlined">home</span>
+        Home
+      </div>
+      <div class="nav-item" onclick="showQR()">
+        <span class="material-icons-outlined">qr_code_scanner</span>
+        QR
+      </div>
+      <div class="nav-item" onclick="showProfile()">
+        <span class="material-icons-outlined">person</span>
+        Profile
+      </div>
+    </div>
+    
+  </div>
+  <script src="data.js"></script>
+  
+  <script>
+    // Stored data from firebase 
+    const appState = {
+      user: {
+        name: "",
+        status: ""
+      },
+      currentTab: "home"
+    };
+    
+    function updateUserUI() {
+      const nameEl = document.getElementById("data-name");
+      const statusEl = document.getElementById("status");
+      
+      if (nameEl) nameEl.innerText = appState.user.name;
+      if (statusEl) statusEl.innerText = appState.user.status;
+    }
+  </script>
+  
+  <script>
+    const content = document.getElementById("content");
+    const headerTitle = document.getElementById("headerTitle");
+    const navItems = document.querySelectorAll(".nav-item");
+     
+    let historyStack = [];
+    let html5QrCode;
+    let torchOn = false;
+    let unreadNotifications = 22; //badge
+    let visibleCount = 7; // show 4 card
+    let disableAnimation = false;
+    updateBadge();
+    
+    //  Notification badge 
+    function updateBadge() {
+      const badge = document.getElementById("notifBadge");
+      if (!badge) return;
+      
+      if (unreadNotifications > 0) {
+        badge.innerText = unreadNotifications > 9 ? "9+" : unreadNotifications;
+        badge.style.display = "flex";
+      } else {
+        badge.style.display = "none";
+      }
+    }
+    
+    function showNotifications() {
+      push(showNotifications);
+      headerTitle.innerText = "Notifications";
+      renderNotifications();
+      unreadNotifications = 0; // mark all read
+      updateBadge();
+    }
+    
+    /* DARK MODE */
+    function toggleDarkMode() {
+      const isDark = document.documentElement.dataset.theme === "dark";
+      document.documentElement.dataset.theme = isDark ? "" : "dark";
+      localStorage.setItem("theme", isDark ? "light" : "dark");
+      initDarkSwitch();
+      
+    }
+    
+    function initDarkSwitch() {
+      const sw = document.getElementById("darkSwitch");
+      if (!sw) return;
+      if (localStorage.getItem("theme") === "dark") {
+        document.documentElement.dataset.theme = "dark";
+        sw.classList.add("active");
+      } else {
+        sw.classList.remove("active");
+      }
+    }
+    
+    /* INIT */
+    showHome();
+    if (localStorage.getItem("theme") === "dark") {
+      document.documentElement.dataset.theme = "dark";
+    }
+    //dark mode code end
+    
+    
+    function setNav(index) {
+      navItems.forEach(n => n.classList.remove("active"));
+      navItems[index].classList.add("active");
+    }
+    
+    function push(fn) {
+      historyStack.push(fn);
+    }
+    
+    function goBack() {
+      if (historyStack.length > 1) {
+        historyStack.pop();
+        historyStack[historyStack.length - 1]();
+      }
+    }
+    
+    /* HOME */
+    function showHome() {
+      push(showHome);
+      setNav(0);
+      headerTitle.innerText = "Home";
+      
+      content.innerHTML = `
+      <h2 class="welcome">Welcome, <span id="data-name">${appState.user.name}</span></h2>
+    
+    <!-- STATUS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="left">
+          <span class="material-icons-outlined primary">add_reaction</span>
+          <span>Status</span>
+        </div>
+        <button class="post-btn">Post</button>
+      </div>
+      <textarea placeholder="Write your status here..." maxlength="100" oninput="this.style.height='';this.style.height=this.scrollHeight+'px'" class="status-box"></textarea>
+      
+      <div class="status-options">
+        <div class="option">Available</div>
+        <div class="option">Busy</div>
+        <div class="option">Out</div>
+        <div class="option">Vacation</div>
+      </div>
+    </div>
+  `;
+      updateUserUI();
+      initExpandableCards();
+      initRipple();
+    }
+    
+    /* QR */
+    function showQR() {
+      push(showQR);
+      setNav(1);
+      headerTitle.innerText = "QR";
+      content.innerHTML = `
+    <div class="segment">
+    <button class="active" onclick="showScan()">Scan</button>
+   <button onclick="showMyQR()">My QR</button>
+  
+ </div>
+ <div id="qrContent"></div>
+  `;
+      showScan();
+    }
+    
+    function showMyQR() {
+      document.querySelectorAll(".segment button")[1].classList.add("active");
+      document.querySelectorAll(".segment button")[0].classList.remove("active");
+      
+      const user = auth.currentUser;
+      if (!user) return;
+      
+      const uid = user.uid;
+      
+      document.getElementById("qrContent").innerHTML = `
+    <div class="card">
+      <div class="qr" id="qrcode"></div>
+      <div class="sub" style="text-align:center">${uid}</div>
+      <button class="btn-primary ripple" onclick="shareDiv()">
+        <span class="material-icons-outlined">share</span>Share QR
+      </button>
+      <button class="btn-secondary ripple" onclick="downloadDiv()">
+        <span class="material-icons-outlined">download</span>Download QR
+      </button>
+    </div>
+  `;
+      
+      // Clear old QR if exists
+      const qrBox = document.getElementById("qrcode");
+      qrBox.innerHTML = "";
+      
+      new QRCode(qrBox, {
+        text: uid,
+        width: 1800,
+        height: 1800,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }
+    
+    
+    
+    function showScan() {
+      document.querySelectorAll(".segment button")[0].classList.add("active");
+      document.querySelectorAll(".segment button")[1].classList.remove("active");
+      
+      document.getElementById("qrContent").innerHTML = `
+    <div class="scan-box" id="scanner">
+    </div>
+    
+    
+     <div class="scan-actions">
+     
+<input type="file" id="qr-image" accept="image/*">
+
+<div class="action ripple" onclick="document.getElementById('qr-image').click()">
+  <span class="material-icons-outlined">photo</span>
+  Gallery
+</div>
+      
+      
+      <div class="action ripple" onclick="toggleFlash()">
+        <span class="material-icons-outlined">flashlight_on</span>
+        Flashlight
+      </div>
+    </div>
+
+
+    <div class="scan-instructions ripple" style="margin-top:12px">
+      <span class="material-icons-outlined">info</span>
+  <div>
+    Align the QR code inside the frame.<br>
+    Hold steady and ensure good lighting.
+  </div>
+    </div>
+  `;
+      /* Scanner settings*/
+      html5QrCode = new Html5Qrcode("scanner");
+      
+      html5QrCode.start({ facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: { width: 240, height: 250 },
+          aspectRatio: 1.0,
+          formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+        },
+        qrCodeMessage => {
+          navigator.vibrate(150);
+          html5QrCode.stop();
+           // Pass scanned value in URL
+          location.href = "profileforvisitor.html?uid=" + encodeURIComponent(qrCodeMessage);
+        }
+      );
+    
+      /* file select */
+      document.addEventListener("change", async function(e) {
+        if (e.target && e.target.id === "qr-image") {
+          const file = e.target.files[0];
+          if (!file) return;
+          
+          try {
+            await html5QrCode.stop().catch(() => {});
+            
+            const decodedText = await html5QrCode.scanFile(file, true);
+            
+            navigator.vibrate(20);
+            
+            location.href = "profileforvisitor.html?uid=" + encodeURIComponent(decodedText);
+            
+          } catch (err) {
+            alert("No QR found in image");
+          }
+        }
+      });
+      
+    }
+    
+    /* PROFILE */
+    function showProfile() {
+      push(showProfile);
+      setNav(2);
+      headerTitle.innerText = "Profile";
+      
+      content.innerHTML = `
+    <div class="card profile-card ripple" onclick="openProfile()">
+      <div class="avatar"><img src="https://i.pravatar.cc/100"></div>
+      <div>
+        <div class="name">Rakesh Chowdhury</div>
+        <div class="sub">Tap to preview</div>
+      </div>
+      <span class="material-icons-outlined" style="margin-left:auto">chevron_right</span>
+    </div>
+
+    <div class="card">
+      <div class="sub">Account</div>
+      <div class="row ripple">
+        <div class="left">
+          <span class="material-icons-outlined icon">person</span>
+          Edit Profile
+        </div>
+        <span class="material-icons-outlined">chevron_right</span>
+      </div>
+      
+      <div class="row ripple">
+        <div class="left">
+          <span class="material-icons-outlined icon">lock</span>
+          Password 
+        </div>
+        <span class="material-icons-outlined">chevron_right</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sub">Behavior</div>
+
+      <div class="row ripple">
+        Allow voice messages
+        <div class="switch"></div>
+      </div>
+
+      <div class="row ripple">
+        Notification 
+        <div class="switch"></div>
+      </div>
+      
+    <div class="row ripple">
+  Dark Mode
+  <div class="switch" id="darkSwitch" onclick="toggleDarkMode()"></div>
+</div>
+
+      <div class="row ripple">
+        Who can message me
+        <div class="sub">Anyone</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sub">Emergency Contacts</div>
+      <div class="row ripple">
+        <div class="left">
+          <span class="material-icons-outlined icon">shield</span>
+          Police
+        </div>
+        <div class="sub">100</div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="card">
+  <div class="row ripple">
+    <div class="left">
+      <span class="material-icons-outlined">help</span>
+      Help & Support
+    </div>
+    <span class="material-icons-outlined">chevron_right</span>
+  </div>
+  
+  <div class="row ripple" id="logoutBtn" style="color:red">
+    <div class="left">
+      <span class="material-icons-outlined">logout</span>
+      Logout
+    </div>
+  </div>
+</div>
+  `;
+    }
+    // Open Profile Page 
+    function openProfile() {
+      window.location.href = "profile.html";
+    }
+    
+    /* Download QR*/
+    function downloadDiv() {
+      const qrdiv = document.getElementById("qrcode");
+      html2canvas(qrdiv, { backgroundColor: null, scale: 4 }).then(canvas => {
+        const link = document.createElement("a");
+        link.download = "MyQR.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      });
+    }
+    
+    /* Share QR */
+    async function shareDiv() {
+      const qrdiv = document.getElementById("qrcode");
+      
+      const canvas = await html2canvas(qrdiv, { backgroundColor: null, scale: 4 });
+      
+      canvas.toBlob(async (blob) => {
+        const file = new File([blob], "MyQR.png", { type: "image/png" });
+        
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: "My QR",
+            text: "Scan my QR to contact me",
+            url: "https://yourapp.com/u/abc123",
+            files: [file]
+          });
+        } else {
+          alert("Sharing not supported on this device. You can download instead.");
+        }
+      });
+    }
+    /* Flashlight */
+    async function toggleFlash() {
+      if (!html5QrCode) return;
+      try {
+        const caps = html5QrCode.getRunningTrackCapabilities();
+        if (!caps || !caps.torch) {
+          alert("Flashlight not supported on this device");
+          return;
+        }
+        await html5QrCode.applyVideoConstraints({
+          advanced: [{ torch: !torchOn }]
+        });
+        torchOn = !torchOn;
+      } catch (e) {
+        console.log(e);
+        alert("Flashlight error");
+      }
+    }
+    
+    showHome();
+    
+    
+    
+    //Expand Cards
+    function initExpandableCards() {
+      document.querySelectorAll(".card").forEach(card => {
+        const chevron = card.querySelector(".card-header .material-icons-outlined:last-child");
+        if (!chevron) return;
+        // start collapsed
+        card.classList.add("collapsed");
+        chevron.addEventListener("click", (e) => {
+          e.stopPropagation();
+          card.classList.toggle("collapsed");
+          card.classList.toggle("open");
+        });
+      });
+    }
+    
+    //Ripple effects 
+    
+    function initRipple() {
+      document.querySelectorAll(".ripple").forEach(el => {
+        el.onclick = function(e) {
+          const circle = document.createElement("span");
+          circle.className = "ripple-effect";
+          
+          const d = Math.max(this.clientWidth, this.clientHeight);
+          circle.style.width = circle.style.height = d + "px";
+          
+          const rect = this.getBoundingClientRect();
+          circle.style.left = (e.clientX - rect.left - d / 2) + "px";
+          circle.style.top = (e.clientY - rect.top - d / 2) + "px";
+          
+          this.appendChild(circle);
+          setTimeout(() => circle.remove(), 600);
+        };
+      });
+    }
+  </script>
+  
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      sendEmailVerification,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    
+    
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyArp702oudfyWaixwurzUlXi1ojW4gQy1k",
+      authDomain: "contact-e46cf.firebaseapp.com",
+      databaseURL: "https://contact-e46cf-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "contact-e46cf",
+      storageBucket: "contact-e46cf.firebasestorage.app",
+      messagingSenderId: "846074615994",
+      appId: "1:846074615994:web:caf518253b8220de7d4a83",
+      measurementId: "G-7ML33M2C3C"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    
+    window.auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    const db = getDatabase(app);
+    
+    
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const uid = user.uid;
+        const userRef = ref(db, 'users/' + uid);
+        
+        onValue(userRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            
+            appState.user.name = data.full_name || "";
+            appState.user.status = data.status || "";
+            
+            localStorage.setItem("user_name", appState.user.name);
+            localStorage.setItem("user_status", appState.user.status);
+            
+            updateUserUI(); // refresh UI safely
+          }
+        });
+        
+      } else {
+        window.location.href = "login.html";
+      }
+    });
+    
+    appState.user.name = localStorage.getItem("user_name") || "";
+    appState.user.status = localStorage.getItem("user_status") || "";
+    
+    document.addEventListener("DOMContentLoaded", () => {
+      updateUserUI();
+    });
+    
+    
+    // Any Click Handling
+    content.addEventListener("click", handleClicks);
+    
+    function handleClicks(e) {
+      if (e.target.closest("#logoutBtn")) {
+        logout();
+      }
+      if (e.target.closest("#editBtn")) {
+        editbtn();
+      }
+    }
+    
+    // Logout function
+    async function logout() {
+      try {
+        await signOut(auth);
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.replace("login.html");
+      } catch (error) {
+        console.error("Logout error:", error);
+      }
+    }
+    
+    //Auto Redirect 
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.replace("login.html");
+      }
+    });
+  </script>
+  
+</body>
+
+</html>
