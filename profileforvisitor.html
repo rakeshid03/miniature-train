@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <title>User</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --card: rgba(255, 255, 255, 1);
+      --text: #1c1c1e;
+      --muted: #6b7280;
+      --primary: #f5b301;
+      --border: #e5e7eb;
+      --shadow: 0 6px 16px rgba(0, 0, 0, .05);
+      --radius: 20px;
+    }
+    
+    [data-theme="dark"] {
+      --bg: #0f1115;
+      --card: #1a1c22;
+      --text: #ffffff;
+      --muted: #9ca3af;
+      --primary: #f5b301;
+      --border: #2a2d36;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+      transition: background .25s, color .25s, transform .15s;
+    }
+    
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      width: 100%;
+      height: 100%;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body::-webkit-scrollbar {
+      display: none;
+    }
+    
+    a {
+      color: #343b45;
+      text-decoration: none;
+    }
+    
+    .app {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0;
+      right: 0;
+    }
+    
+    /* HEADER */
+    .header {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      font-weight: 600;
+      font-size: 20px;
+      justify-content: space-between;
+    }
+    
+    .back-btn {
+      cursor: pointer;
+    }
+    
+    .left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .notification {
+      position: relative;
+      background: var(--card);
+      border-radius: 50%;
+      padding: 9px;
+      display: flex;
+      font-size: 1.4rem;
+      border: 1px solid var(--border);
+    }
+    
+    .notification:hover,
+    .notification:active {
+      background: var(--card);
+      color: var(--primary);
+    }
+    
+    /* Badge */
+    .badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: #ff3b30;
+      color: white;
+      font-size: 10px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+    }
+    
+    /* CONTENT */
+    .content {
+      flex: 1;
+      overflow: auto;
+      padding: 16px;
+    }
+    
+    .sub {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    
+    /*main page style*/
+    /* Profile Card */
+    .profile-card {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    
+    .avatar {
+      margin-top: -70px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 4px solid var(--border);
+      object-fit: cover;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    
+    .profile-card h2 {
+      margin: 5px 0 6px;
+      font-weight: 600;
+    }
+    
+    /* Status */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 50px;
+      background: #fff3d6;
+      font-size: 13px;
+      color: #7a5d00;
+    }
+    
+    /* Card */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 12px;
+      box-shadow: var(--shadow);
+    }
+    
+    .card:first-child {
+      margin-top: 60px;
+    }
+    
+    .card:not(:last-child) {
+      margin-bottom: 14px;
+    }
+    
+    /* Section title */
+    .section-title {
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 8px;
+      padding-left: 6px;
+    }
+    
+    
+    /* List Item */
+    .list-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px;
+      border-radius: 14px;
+      transition: 0.2s ease;
+    }
+    
+    .list-item:not(:last-child) {
+      border-bottom: 0.8px solid var(--border);
+    }
+    
+    .list-item:hover {
+      background: #f0f2f5;
+    }
+    
+    .arrow {
+      margin-left: auto;
+      color: var(--sub);
+    }
+    
+    .number {
+      margin-left: auto;
+      max-width: 4ch;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--muted);
+      font-weight: 400;
+    }
+    
+    .warn {
+      color: #f5b301;
+    }
+    
+    /* Bottom Doorbell Bar */
+    .doorbell-bar {
+      background: var(--card);
+      z-index: 999;
+      height: 100px;
+      width: 100%;
+      padding: 12px;
+      box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.08);
+      border-top: 1px solid var(--border);
+      border-top-left-radius: 18px;
+      border-top-right-radius: 18px;
+    }
+    
+    
+    /* Doorbell Button */
+    .doorbell-btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      background: #f5b301;
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 1px 16px rgba(255, 240, 91, 0.35);
+      transition: 0.2s ease;
+    }
+    
+    /* Small caption */
+    .bell-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--sub);
+      margin-top: 8px;
+    }
+    
+    /* Button feedback */
+    .doorbell-btn:active {
+      transform: scale(0.97);
+    }
+    
+    /* Disabled state */
+    .doorbell-btn.disabled {
+      pointer-events: none;
+    }
+    
+    /* Ringing animation */
+    .ringing {
+      animation: shake 0.3s infinite;
+    }
+    
+    @keyframes shake {
+      0% {
+        transform: translateX(-2px);
+      }
+      
+      50% {
+        transform: translateX(2px);
+      }
+      
+      100% {
+        transform: translateX(-2px);
+      }
+    }
+    
+    /* Success glow */
+    .success-glow {
+      background: #22c55e !important;
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
+      animation: successPulse 1s ease forwards;
+    }
+    
+    @keyframes successPulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
+      }
+      
+      100% {
+        box-shadow: 0 0 18px 8px rgba(34, 197, 94, 0.0);
+      }
+    }
+    
+    /*Bottom ring button*/
+    
+    
+    /* RIPPLE */
+    .ripple {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* ripple circle */
+    .ripple .ripple-effect {
+      position: absolute;
+      border-radius: 50%;
+      transform: scale(0);
+      animation: ripple-animation 600ms linear;
+      background: rgba(0, 0, 0, 0.12);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    /* keep content above ripple */
+    .ripple>* {
+      position: relative;
+      z-index: 1;
+    }
+    
+    @keyframes ripple-animation {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+  </style>
+  
+  <title>Visitor Profile</title>
+</head>
+
+<body>
+  
+  <div class="app">
+    <!-- HEADER -->
+    <div class="header">
+      <div class="left">
+        <span class="material-icons-outlined back-btn" onclick="goBack()">arrow_back</span>
+        <div class="header-title" id="headerTitle">Profile</div>
+      </div>
+      <span class="notification" onclick="showNotifications()">
+        <span class="material-icons-outlined">notifications</span>
+        <span class="badge" id="notifBadge"></span>
+      </span>
+    </div>
+    
+    
+    <!-- APP All CONTENT -->
+    <div class="content" id="content">
+      
+      
+      <!-- Contact Actions -->
+      <div class="card">
+        <!-- Profile Header -->
+        <div class="profile-card">
+          <img src="https://i.pravatar.cc/150" class="avatar">
+          <h2 id="fullname"></h2>
+          <div class="status-pill" id="status-text"></div>
+        </div>
+        
+        <div class="list-item ripple" onclick="contact('call')">
+          <span class="material-icons-outlined warn">call</span>
+          Make a Call
+          <span class="material-icons-outlined arrow">chevron_right</span>
+        </div>
+        
+        <div class="list-item ripple" onclick="contact('sms')">
+          <span class="material-icons-outlined warn">chat</span>
+          Send Message
+          <span class="material-icons-outlined arrow">chevron_right</span>
+        </div>
+        
+        <div class="list-item ripple" onclick="contact('email')">
+          <span class="material-icons-outlined warn">mail</span>
+          Send Email
+          <span class="material-icons-outlined arrow">chevron_right</span>
+        </div>
+      </div>
+      
+      
+      
+      <!-- Emergency -->
+      <div class="card emergency-list">
+        <div class="section-title">Emergency Contacts</div>
+        
+        <div class="list-item ripple" onclick="contact('emergency')">
+          <span class="material-icons-outlined warn">contact_emergency</span>
+          <span id="emergencycontactname"></span><span id="emergencycontactrelation" class="sub" style="margin-left: -8px;"></span>
+          <span class="number" id="emergencycontact"></span>
+        </div>
+        
+        <div class="list-item ripple">
+          <span class="material-icons-outlined warn">local_fire_department</span>
+          Fire Brigade
+          <span class="number">101</span>
+        </div>
+        
+        <div class="list-item ripple">
+          <span class="material-icons-outlined warn">medical_services</span>
+          Ambulance
+          <span class="number">102</span>
+        </div>
+        
+        <div class="list-item ripple">
+          <span class="material-icons-outlined warn">local_police</span>
+          Police
+          <span class="number">100</span>
+        </div>
+        
+        <div class="list-item ripple">
+          <span class="material-icons-outlined warn">propane_tank</span>
+          Gas
+          <span class="number">1906</span>
+        </div>
+        
+        <div class="list-item ripple">
+          <span class="material-icons-outlined warn">bolt</span>
+          Electricity
+          <span class="number">198</span>
+        </div>
+      </div>
+      
+      
+    </div>
+    <!--App main content end-->
+    
+    <!-- Floating Bell -->
+    <div class="doorbell-bar">
+      <button class="doorbell-btn" onclick="ringBell()" id="doorbellBtn">
+        <span class="material-icons-outlined" id="bellIcon">notifications_active</span>
+        <span id="bellText">Ring Doorbell</span>
+      </button>
+      
+      <div class="bell-note">Works only near the QR Code</div>
+    </div>
+    
+  </div>
+  <!--App Close-->
+  
+  <script src="data.js"></script>
+  <script>
+    
+    function contact(type) {
+      navigator.vibrate?.(10);
+      const data = window.visitorData;
+      
+      const actions = {
+        call: data.number ? "tel:" + data.number : null,
+        emergency: data.emergency ? "tel:" + data.emergency : null,
+        email: data.email ?
+          "mailto:" + data.email +
+          "?subject=Visitor at door&body=Hello, I am outside your door." :
+          null,
+        sms: data.number ?
+          "sms:" + data.number +
+          "?body=Knock… knock… I’m outside your house right now. Are you available? Sent via the QR app." :
+          null
+      };
+      
+      if (actions[type]) {
+        window.location.href = actions[type];
+      }
+    }
+    
+    
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll(".emergency-list .list-item")
+        .forEach(item => {
+          
+          const numberEl = item.querySelector(".number");
+          if (!numberEl) return;
+          
+          item.addEventListener("click", () => {
+            navigator.vibrate?.(10);
+            
+            const number = numberEl.innerText.trim();
+            if (number) {
+              window.location.href = "tel:" + number;
+            }
+          });
+          
+        });
+    });
+  </script>
+  
+  <script>
+    let unreadNotifications = 23; //badge
+    let visibleCount = 7; // show 4 card
+    let disableAnimation = false;
+    
+    updateBadge();
+    
+    //  Notification badge 
+    function updateBadge() {
+      const badge = document.getElementById("notifBadge");
+      if (!badge) return;
+      
+      if (unreadNotifications > 0) {
+        badge.innerText = unreadNotifications > 9 ? "9+" : unreadNotifications;
+        badge.style.display = "flex";
+      } else {
+        badge.style.display = "none";
+      }
+    }
+    
+    
+    function goBack() {
+      if (document.referrer !== "") {
+        window.history.back();
+      } else {
+        // fallback if no history (direct open)
+        window.location.href = "index.html";
+      }
+    }
+    
+    function ringBell() {
+      const btn = document.getElementById("doorbellBtn");
+      const text = document.getElementById("bellText");
+      const icon = document.getElementById("bellIcon");
+      
+      
+      // Prevent clicking while busy
+      if (btn.classList.contains("disabled")) return;
+      
+      btn.classList.add("disabled");
+      
+      if (navigator.vibrate) {
+        navigator.vibrate(200);
+      }
+      
+      btn.classList.add("ringing");
+      text.innerText = "Ringing...";
+      icon.innerText = "ring_volume"; // bell icon
+      
+      setTimeout(() => {
+        btn.classList.remove("ringing");
+        
+        btn.classList.add("success-glow");
+        text.innerText = "Owner notified";
+        icon.innerText = "check_circle"; // ✅ change to tick icon
+        
+        setTimeout(() => {
+          btn.classList.remove("success-glow");
+          text.innerText = "Ring Doorbell";
+          icon.innerText = "notifications_active"; // 🔔 back to bell
+          btn.classList.remove("disabled"); // Enable again
+        }, 2000);
+        
+      }, 2000);
+    }
+    
+    // Ripple Effects 
+    function initRipple() {
+      document.querySelectorAll(".ripple").forEach(el => {
+        
+        el.addEventListener("click", function(e) {
+          
+          const circle = document.createElement("span");
+          circle.classList.add("ripple-effect");
+          
+          const rect = el.getBoundingClientRect();
+          const size = Math.max(rect.width, rect.height);
+          
+          circle.style.width = circle.style.height = size + "px";
+          circle.style.left = (e.clientX - rect.left - size / 2) + "px";
+          circle.style.top = (e.clientY - rect.top - size / 2) + "px";
+          
+          el.appendChild(circle);
+          
+          setTimeout(() => {
+            circle.remove();
+          }, 600);
+        });
+      });
+    }
+    // run once
+    initRipple();
+  </script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyArp702oudfyWaixwurzUlXi1ojW4gQy1k",
+      authDomain: "contact-e46cf.firebaseapp.com",
+      databaseURL: "https://contact-e46cf-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "contact-e46cf",
+      storageBucket: "contact-e46cf.firebasestorage.app",
+      messagingSenderId: "846074615994",
+      appId: "1:846074615994:web:caf518253b8220de7d4a83",
+      measurementId: "G-7ML33M2C3C"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    
+    document.addEventListener("DOMContentLoaded", () => {
+      
+      const params = new URLSearchParams(window.location.search);
+      const QRuid = params.get("uid");
+      
+      if (!QRuid) {
+        alert("Invalid QR Code");
+        window.location.href = "index 1.html";
+        return;
+      }
+      
+      const userRef = ref(db, 'users/' + QRuid);
+      
+      onValue(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+          
+          const data = snapshot.val();
+          window.visitorData = snapshot.val();
+          
+          document.getElementById("fullname").innerText =
+            data.full_name || "";
+          
+          document.getElementById("status-text").innerText =
+            data.status || "";
+          
+          document.getElementById("emergencycontact").innerText =
+            data.emergency_contact || "";
+          
+          document.getElementById("emergencycontactname").innerText =
+            data.emergency_contact_name || "";
+          
+          document.getElementById("emergencycontactrelation").innerText =
+            data.emergency_contact_relation ?
+            "(" + data.emergency_contact_relation + ")" :
+            "";
+          
+          // Store numbers locally in memory only
+          window.visitorData = {
+            number: data.number || "",
+            email: data.email || "",
+            emergency: data.emergency_contact || ""
+          };
+          
+        } else {
+          alert("User not found");
+          window.location.href = "index.html";
+        }
+      });
+      
+      
+      
+    });
+    
+    
+    
+    
+    
+    // 🔍 QR RELATED 
+  </script>
+  
+</body>
+
+  </html>
